@@ -1,8 +1,8 @@
-numpy==1.24.3
-opencv-python==4.8.1.78
-matplotlib==3.8.0
-Pillow==10.1.0
-streamlit==1.28.0
-reportlab==4.0.7
-scipy==1.11.3
-plotly==5.17.0
+numpy
+opencv-python
+matplotlib
+Pillow
+streamlit
+reportlab
+scipy
+plotly
