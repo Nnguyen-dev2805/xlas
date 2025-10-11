@@ -1,14 +1,3 @@
-"""
-Main Application - Xử lý Ảnh Số
-===============================
-
-Giao diện chính tích hợp cả Bài 1 và Bài 2 với tab system
-- Tab 1: Histogram Processing (Bài 1)
-- Tab 2: Image Filtering & Convolution (Bài 2)
-
-Tác giả: Nhóm xử lý ảnh số
-"""
-
 import streamlit as st
 import sys
 import os
@@ -20,11 +9,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from app_01 import main as bai1_main
 from app_02 import main as bai2_main
 
+# cấu hình trang chính
 def setup_main_page():
-    """Cấu hình trang chính"""
     st.set_page_config(
         page_title="Xử lý Ảnh Số - XLAS",
-        # page_icon="🖼️",
         layout="wide",
         initial_sidebar_state="expanded"
     )
@@ -63,14 +51,6 @@ def setup_main_page():
         border-bottom: 2px solid #ecf0f1;
     }
     
-    .info-banner {
-        background: linear-gradient(90deg, #e3f2fd, #f3e5f5);
-        padding: 1rem;
-        border-radius: 10px;
-        border-left: 5px solid #2196f3;
-        margin: 1rem 0;
-    }
-    
     /* Custom radio button styling to look like tabs */
     .stRadio > div {
         display: flex;
@@ -106,35 +86,13 @@ def setup_main_page():
     </style>
     """, unsafe_allow_html=True)
 
+# hiển thị header chính của app
 def render_main_header():
-    """Hiển thị header chính của app"""
     st.markdown('<h1 class="main-app-title">Xử lý Ảnh Số - XLAS</h1>', 
                 unsafe_allow_html=True)
-    
-    # Nút reset session nếu có lỗi
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        if st.button("🔄 Reset Session (nếu có lỗi)", help="Nhấn nếu gặp lỗi upload hoặc hiển thị"):
-            # Clear all session state
-            for key in list(st.session_state.keys()):
-                del st.session_state[key]
-            st.success("Đã reset session! Trang sẽ tự động reload.")
-            st.rerun()
-    
-    st.markdown("""
-    <div class="info-banner">
-    <h3>Chào mừng đến với hệ thống xử lý ảnh số!</h3>
-    <p>Chọn tab bên dưới để thực hiện các bài tập:</p>
-    <ul>
-    <li><strong>Bài 1:</strong> Histogram Processing - Cân bằng và thu hẹp histogram</li>
-    <li><strong>Bài 2:</strong> Image Filtering & Convolution - Lọc ảnh và phép tích chập</li>
-    </ul>
-    <p><small>💡 <strong>Lưu ý:</strong> Nếu gặp lỗi upload ảnh, hãy nhấn nút "Reset Session" ở trên.</small></p>
-    </div>
-    """, unsafe_allow_html=True)
 
+# hàm chính
 def main():
-    """Hàm main chính"""
     # Cấu hình trang
     setup_main_page()
     

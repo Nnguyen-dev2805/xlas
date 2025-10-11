@@ -13,7 +13,7 @@ def add_padding(image, pad_size, pad_value=0):
     
     return padded_image
 
-# hàm tính tích chập
+# hàm tính tích chập tự code
 def convolution_2d_manual(image, kernel, padding=0, stride=1):
     if len(image.shape) != 2:
         raise ValueError("Ảnh phải là ảnh xám")
@@ -57,10 +57,8 @@ def convolution_2d_manual(image, kernel, padding=0, stride=1):
     
     return output
 
+# hàm tính tích châp dùng thư viện
 def convolution_2d_library(image, kernel, padding=0, stride=1):
-    """
-    Convolution 2D - DÙNG THƯ VIỆN
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be 2D image")
     
@@ -72,11 +70,9 @@ def convolution_2d_library(image, kernel, padding=0, stride=1):
     
     return output
 
-
+# median filter tự code 
 def median_filter_manual(image, kernel_size):
     """
-    Median Filter - TỰ CODE
-    
     Thuật toán:
     1. Slide window kích thước kernel_size x kernel_size
     2. Tại mỗi vị trí: lấy median của các pixel trong window
@@ -127,11 +123,8 @@ def median_filter_manual(image, kernel_size):
     
     return filtered_image
 
-
+# median filter dùng thư viện
 def median_filter_library(image, kernel_size):
-    """
-    Median Filter - DÙNG THƯ VIỆN
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be 2D image")
     
@@ -140,11 +133,8 @@ def median_filter_library(image, kernel_size):
     
     return filtered_image
 
-
+# min filter tự code
 def min_filter_manual(image, kernel_size):
-    """
-    Min Filter (Erosion) - TỰ CODE
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be 2D image")
     
@@ -173,11 +163,8 @@ def min_filter_manual(image, kernel_size):
     
     return filtered_image
 
-
+# max filter tự code
 def max_filter_manual(image, kernel_size):
-    """
-    Max Filter (Dilation) - TỰ CODE
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be 2D image")
     
@@ -206,19 +193,11 @@ def max_filter_manual(image, kernel_size):
     
     return filtered_image
 
-
+# thresholding comparison giữa 2 ảnh
 def threshold_comparison(image1, image2):
     """
     Thresholding comparison giữa 2 ảnh
-    
     Logic: if image1(x,y) > image2(x,y) then output = 0 else output = image2(x,y)
-    
-    Args:
-        image1: Ảnh thứ nhất (I4)
-        image2: Ảnh thứ hai (I5)
-        
-    Returns:
-        numpy.ndarray: Ảnh kết quả sau thresholding
     """
     # Đảm bảo 2 ảnh có cùng kích thước
     if image1.shape != image2.shape:

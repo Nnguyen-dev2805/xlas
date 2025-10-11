@@ -2,20 +2,12 @@ import numpy as np
 import cv2
 from PIL import Image
 
-
+# chuyển RGB sang Grayscale - tự code
 def rgb_to_grayscale_manual(rgb_image):
     """
-    Chuyển RGB sang Grayscale - TỰ CODE
-    
     Thuật toán:
     - Áp dụng công thức ITU-R BT.601
     - Gray = 0.299*R + 0.587*G + 0.114*B
-    
-    Args:
-        rgb_image: Ảnh RGB shape (H, W, 3)
-        
-    Returns:
-        gray_image: Ảnh grayscale shape (H, W)
     """
     if len(rgb_image.shape) != 3 or rgb_image.shape[2] != 3:
         raise ValueError("Input must be RGB image with shape (H, W, 3)")
@@ -37,11 +29,8 @@ def rgb_to_grayscale_manual(rgb_image):
     
     return gray_image
 
-
+# chuyển rgb sang Grayscale - dùng thư viện
 def rgb_to_grayscale_library(rgb_image):
-    """
-    Chuyển RGB sang Grayscale - DÙNG THƯ VIỆN
-    """
     if len(rgb_image.shape) != 3 or rgb_image.shape[2] != 3:
         raise ValueError("Input must be RGB image with shape (H, W, 3)")
     
@@ -49,11 +38,8 @@ def rgb_to_grayscale_library(rgb_image):
     gray_image = cv2.cvtColor(rgb_image, cv2.COLOR_RGB2GRAY)
     return gray_image
 
-
+# load ảnh từ file
 def load_image(image_path):
-    """
-    Load ảnh từ file
-    """
     try:
         image = Image.open(image_path)
         if image.mode != 'RGB':
@@ -62,11 +48,8 @@ def load_image(image_path):
     except Exception as e:
         raise ValueError(f"Cannot load image from {image_path}: {e}")
 
-
+# lưu ảnh ra file
 def save_image(image_array, output_path):
-    """
-    Lưu ảnh ra file
-    """
     try:
         if len(image_array.shape) == 2:
             # Grayscale image
@@ -79,11 +62,8 @@ def save_image(image_array, output_path):
     except Exception as e:
         raise ValueError(f"Cannot save image to {output_path}: {e}")
 
-
+# resize ảnh về kích thước target
 def resize_image(image, target_size):
-    """
-    Resize ảnh về kích thước target
-    """
     if len(image.shape) == 2:
         # Grayscale
         return cv2.resize(image, target_size)
@@ -91,11 +71,8 @@ def resize_image(image, target_size):
         # RGB
         return cv2.resize(image, target_size)
 
-
+# tạo ảnh mẫu với các pattern khác nhau
 def create_sample_images(count=10):
-    """
-    Tạo ảnh mẫu để test
-    """
     images = []
     
     for i in range(count):
@@ -156,15 +133,9 @@ def create_sample_images(count=10):
     
     return images
 
-
+# so sánh 2 ảnh
+# phương pháp so sánh ('mse', 'psnr', 'ssim')
 def compare_images(image1, image2, method='mse'):
-    """
-    So sánh 2 ảnh
-    
-    Args:
-        image1, image2: 2 ảnh cần so sánh
-        method: Phương pháp so sánh ('mse', 'psnr', 'ssim')
-    """
     if image1.shape != image2.shape:
         raise ValueError("Images must have same shape")
     
@@ -183,17 +154,8 @@ def compare_images(image1, image2, method='mse'):
     else:
         raise ValueError(f"Unknown comparison method: {method}")
 
-
+# lấy thống kê ảnh
 def get_image_stats(image):
-    """
-    Lấy thống kê ảnh
-    
-    Args:
-        image: Input image
-        
-    Returns:
-        stats: Dictionary chứa thống kê
-    """
     stats = {
         'shape': image.shape,
         'dtype': str(image.dtype),
@@ -206,18 +168,8 @@ def get_image_stats(image):
     
     return stats
 
-
+# resize ảnh để match với target shape
 def resize_to_match(image, target_shape):
-    """
-    Resize ảnh để match với target shape
-    
-    Args:
-        image: Ảnh cần resize
-        target_shape: Shape mục tiêu (height, width)
-        
-    Returns:
-        numpy.ndarray: Ảnh đã được resize
-    """
     from PIL import Image as PILImage
     
     # Convert numpy array to PIL Image

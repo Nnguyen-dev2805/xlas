@@ -1,15 +1,8 @@
 import numpy as np
 import cv2
 
-
+# tính histogram - tự code
 def calculate_histogram_manual(image):
-    """
-    Tính histogram - TỰ CODE
-    
-    Thuật toán:
-    - Đếm số lần xuất hiện của mỗi intensity level
-    - Histogram[i] = số pixel có giá trị i
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
     
@@ -23,11 +16,8 @@ def calculate_histogram_manual(image):
     
     return histogram
 
-
+# tính histogram - dùng thư viện
 def calculate_histogram_library(image):
-    """
-    Tính histogram - DÙNG THƯ VIỆN
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
     
@@ -35,24 +25,15 @@ def calculate_histogram_library(image):
     histogram = cv2.calcHist([image], [0], None, [256], [0, 256])
     return histogram.flatten().astype(int)
 
-
+# cân bằng histogram - tự code
 def histogram_equalization_manual(image):
     """
-    Histogram Equalization - TỰ CODE
-    
-    Thuật toán theo công thức chuẩn:
+    Thuật toán:
     1. Tính histogram gốc
     2. Tính p_in(r_k) = n_k / n
     3. Tính s_k = Σ(j=0 to k) p_in(r_j) (CDF)
     4. Scale s_k về [0, L-1]: new_intensity = round(s_k * (L-1))
     5. Áp dụng transformation
-    
-    Args:
-        image: Ảnh grayscale shape (H, W)
-        
-    Returns:
-        equalized_image: Ảnh sau equalization
-        new_histogram: Histogram mới
     """
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
@@ -92,11 +73,8 @@ def histogram_equalization_manual(image):
     
     return equalized_image, new_histogram
 
-
+# cân bằng histogram - dùng thư viện
 def histogram_equalization_library(image):
-    """
-    Histogram Equalization - DÙNG THƯ VIỆN
-    """
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
     
@@ -108,14 +86,11 @@ def histogram_equalization_library(image):
     
     return equalized_image, new_histogram
 
-
+# thu hep histogram - tự code
 def histogram_narrowing_manual(image, min_val=30, max_val=80):
     """
-    Thu hẹp histogram - TỰ CODE
-    
     Thuật toán Linear Mapping:
     new_value = (old_value - old_min) / (old_max - old_min) * (new_max - new_min) + new_min
-
     """
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
@@ -147,11 +122,8 @@ def histogram_narrowing_manual(image, min_val=30, max_val=80):
     
     return narrowed_image, new_histogram
 
-
+# phân tích histogram phục vụ mô tả ảnh
 def analyze_histogram(histogram):
-    """
-    Phân tích histogram phục vụ mô tả ảnh
-    """
     total_pixels = np.sum(histogram)
     
     # Tính mean
