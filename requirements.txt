@@ -1,8 +1,9 @@
-numpy
-opencv-python
-matplotlib
-Pillow
 streamlit
-reportlab
-scipy
+numpy
+matplotlib
+pillow
+opencv-python
+pandas
 plotly
+scipy
+seaborn
