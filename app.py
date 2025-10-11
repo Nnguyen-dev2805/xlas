@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 # Import các modules cho từng bài
 from app_01 import main as bai1_main
 from app_02 import main as bai2_main
+from app_03 import main as bai3_main
 
 # cấu hình trang chính
 def setup_main_page():
@@ -103,7 +104,9 @@ def main():
     st.markdown("### Chọn bài tập:")
     selected_tab = st.radio(
         "Chọn bài tập để thực hiện:",
-        ["Bài 1: Histogram Processing", "Bài 2: Image Filtering & Convolution"],
+        ["Bài 1: Histogram Processing", 
+         "Bài 2: Image Filtering & Convolution",
+         "Bài 3: Pipeline Xử Lý Ảnh Linh Hoạt"],
         horizontal=True,
         key="tab_selector"
     )
@@ -123,7 +126,7 @@ def main():
             st.error(f"Lỗi trong Bài 1: {e}")
             st.info("Đảm bảo file app_01.py tồn tại và có function main()")
     
-    else:  # Bài 2
+    elif selected_tab == "Bài 2: Image Filtering & Convolution":
         st.session_state.current_tab = 'bai2'
         
         st.markdown('<div class="tab-header">Bài 2: Image Filtering & Convolution</div>', 
@@ -135,6 +138,19 @@ def main():
         except Exception as e:
             st.error(f"Lỗi trong Bài 2: {e}")
             st.info("Đảm bảo file app_02.py tồn tại và có function main()")
+    
+    else:  # Bài 3
+        st.session_state.current_tab = 'bai3'
+        
+        st.markdown('<div class="tab-header">Bài 3: Pipeline Xử Lý Ảnh Linh Hoạt</div>', 
+                    unsafe_allow_html=True)
+        
+        # Gọi main function của bài 3
+        try:
+            bai3_main()
+        except Exception as e:
+            st.error(f"Lỗi trong Bài 3: {e}")
+            st.info("Đảm bảo file app_03.py tồn tại và có function main()")
 
 if __name__ == "__main__":
     main()
