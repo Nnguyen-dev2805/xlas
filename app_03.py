@@ -14,7 +14,9 @@ from filters.gaussian_kernel import GaussianKernel
 from filters.sobel_kernel import SobelKernel
 from filters.laplacian_kernel import LaplacianKernel
 from filters.median_kernel import MedianKernel
+from filters.mean_kernel import MeanKernel
 from filters.noise_generator import NoiseGenerator
+from core.histogram import histogram_equalization_library
 
 def safe_image_display(image):
     if image is None:
@@ -81,23 +83,30 @@ def normalize_to_uint8(image):
 def apply_noise(image, noise_type, noise_params):
     """Áp dụng nhiễu lên ảnh"""
     if noise_type == "salt_pepper":
-        return NoiseGenerator.add_salt_pepper_noise(
+        return NoiseGenerator.salt_and_pepper(
             image,
             salt_prob=noise_params.get('salt_prob', 0.02),
             pepper_prob=noise_params.get('pepper_prob', 0.02)
         )
     elif noise_type == "gaussian":
-        return NoiseGenerator.add_gaussian_noise(
+        return NoiseGenerator.gaussian_noise(
             image,
             mean=noise_params.get('mean', 0),
             std=noise_params.get('std', 25)
         )
     elif noise_type == "uniform":
-        return NoiseGenerator.add_uniform_noise(
+        return NoiseGenerator.uniform_noise(
             image,
             low=noise_params.get('low', -50),
             high=noise_params.get('high', 50)
         )
+    elif noise_type == "speckle":
+        return NoiseGenerator.speckle_noise(
+            image,
+            std=noise_params.get('std', 0.1)
+        )
+    elif noise_type == "poisson":
+        return NoiseGenerator.poisson_noise(image)
     else:
         return image
 
@@ -117,6 +126,15 @@ def apply_preprocessing_step(image, filter_type, filter_params):
         padding = kernel_size // 2
         result = convolution_2d_manual(image, kernel, padding=padding, stride=1)
         return normalize_to_uint8(result)
+    
+    elif filter_type == "mean":
+        kernel_size = filter_params.get('kernel_size', 3)
+        return MeanKernel.mean_filter_convolve(image, kernel_size=kernel_size)
+    
+    elif filter_type == "histogram_eq":
+        # Histogram equalization
+        equalized, _ = histogram_equalization_library(image)
+        return equalized
     
     elif filter_type == "sharpen":
         from filters.sharpen_kernel import SharpenKernel
@@ -272,11 +290,12 @@ def main():
     st.write("Tạo pipeline xử lý ảnh linh hoạt với các bước:")
     st.write("")
     st.write("1. **Chọn ảnh gốc**")
-    st.write("2. **Thêm nhiễu** (Salt & Pepper, Gaussian, Uniform, hoặc None)")
-    st.write("3. **Tiền xử lý** (Median, Gaussian, Sharpen, hoặc None) - có thể chọn 0-5 bước theo thứ tự")
-    st.write("4. **Edge Detection** (Sobel hoặc Laplacian)")
+    st.write("2. **Thêm nhiễu** (Salt & Pepper, Gaussian, Uniform, Speckle, Poisson, hoặc None)")
+    st.write("3. **Tiền xử lý** (Median, Gaussian, Mean, Histogram EQ, Sharpen, hoặc None) - có thể chọn 0-5 bước theo thứ tự")
+    st.write("4. **Edge Detection** (Sobel và Laplacian cùng lúc)")
     st.write("")
     st.success("💡 **Tính năng linh hoạt:** Bạn có thể bỏ qua bất kỳ bước nào bằng cách chọn 'None' hoặc đặt số bước = 0")
+    st.info("🎯 **Filters mới:** Mean Filter (tốt cho Uniform noise), Histogram Equalization (tăng contrast)")
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Sidebar
@@ -316,26 +335,53 @@ def main():
     st.sidebar.markdown("### 2️⃣ Thêm nhiễu")
     noise_type = st.sidebar.selectbox(
         "Loại nhiễu:",
-        ["none", "salt_pepper", "gaussian", "uniform"],
+        ["none", "salt_pepper", "gaussian", "uniform", "speckle", "poisson"],
         format_func=lambda x: {
             "none": "Không có nhiễu",
             "salt_pepper": "Salt & Pepper",
             "gaussian": "Gaussian Noise",
-            "uniform": "Uniform Noise"
+            "uniform": "Uniform Noise",
+            "speckle": "Speckle Noise",
+            "poisson": "Poisson Noise"
         }[x]
     )
     
     noise_params = {}
     
     if noise_type == "salt_pepper":
-        noise_params['salt_prob'] = st.sidebar.slider("Salt probability", 0.0, 0.1, 0.02, 0.01)
-        noise_params['pepper_prob'] = st.sidebar.slider("Pepper probability", 0.0, 0.1, 0.02, 0.01)
+        noise_params['salt_prob'] = st.sidebar.slider(
+            "Salt probability", 0.0, 0.1, 0.02, 0.01,
+            help="Xác suất xuất hiện pixel trắng"
+        )
+        noise_params['pepper_prob'] = st.sidebar.slider(
+            "Pepper probability", 0.0, 0.1, 0.02, 0.01,
+            help="Xác suất xuất hiện pixel đen"
+        )
     elif noise_type == "gaussian":
-        noise_params['mean'] = st.sidebar.slider("Mean", -50, 50, 0, 5)
-        noise_params['std'] = st.sidebar.slider("Std Dev", 1, 100, 25, 5)
+        noise_params['mean'] = st.sidebar.slider(
+            "Mean", -50, 50, 0, 5,
+            help="Giá trị trung bình của nhiễu"
+        )
+        noise_params['std'] = st.sidebar.slider(
+            "Std Dev", 1, 100, 25, 5,
+            help="Độ lệch chuẩn - cường độ nhiễu"
+        )
     elif noise_type == "uniform":
-        noise_params['low'] = st.sidebar.slider("Low value", -100, 0, -50, 10)
-        noise_params['high'] = st.sidebar.slider("High value", 0, 100, 50, 10)
+        noise_params['low'] = st.sidebar.slider(
+            "Low value", -100, 0, -50, 10,
+            help="Giá trị thấp nhất của nhiễu"
+        )
+        noise_params['high'] = st.sidebar.slider(
+            "High value", 0, 100, 50, 10,
+            help="Giá trị cao nhất của nhiễu"
+        )
+    elif noise_type == "speckle":
+        noise_params['std'] = st.sidebar.slider(
+            "Std Dev", 0.01, 0.5, 0.1, 0.01,
+            help="Độ lệch chuẩn - cường độ nhiễu đốm"
+        )
+    elif noise_type == "poisson":
+        st.sidebar.info("💡 Poisson noise không cần tham số - dựa vào bản chất lượng tử của ánh sáng")
     
     # Áp dụng nhiễu
     if noise_type != "none":
@@ -376,12 +422,14 @@ def main():
         
         filter_type = st.sidebar.selectbox(
             f"Loại filter:",
-            ["none", "median", "gaussian", "sharpen"],
+            ["none", "median", "gaussian", "mean", "histogram_eq", "sharpen"],
             key=f"filter_type_{i}",
             format_func=lambda x: {
                 "none": "⛔ None (Skip bước này)",
                 "median": "Median Filter",
                 "gaussian": "Gaussian Filter",
+                "mean": "Mean Filter",
+                "histogram_eq": "📊 Histogram Equalization",
                 "sharpen": "Sharpen Filter"
             }[x]
         )
@@ -411,6 +459,20 @@ def main():
                 0.1, 3.0, 1.0, 0.1,
                 key=f"gaussian_sigma_{i}"
             )
+        
+        elif filter_type == "mean":
+            filter_params['kernel_size'] = st.sidebar.select_slider(
+                f"Kernel size:",
+                options=[3, 5, 7],
+                value=3,
+                key=f"mean_size_{i}",
+                help="Averaging window size"
+            )
+            st.sidebar.info("💡 Tốt cho Uniform noise")
+        
+        elif filter_type == "histogram_eq":
+            st.sidebar.caption("📊 Cân bằng histogram")
+            st.sidebar.info("💡 Tăng contrast, phân phối đều pixel values")
         
         elif filter_type == "sharpen":
             filter_params['kernel_size'] = st.sidebar.select_slider(
@@ -472,6 +534,10 @@ def main():
                         caption += f" {step['params']['kernel_size']}x{step['params']['kernel_size']}"
                     elif step['type'] == 'gaussian':
                         caption += f" {step['params']['kernel_size']}x{step['params']['kernel_size']}, σ={step['params']['sigma']}"
+                    elif step['type'] == 'mean':
+                        caption += f" {step['params']['kernel_size']}x{step['params']['kernel_size']}"
+                    elif step['type'] == 'histogram_eq':
+                        caption = "📊 Histogram Equalized"
                     elif step['type'] == 'sharpen':
                         caption += f" {step['params']['kernel_size']}x{step['params']['kernel_size']}, α={step['params']['alpha']}"
                     
@@ -487,64 +553,68 @@ def main():
                 with cols[col_idx]:
                     st.info(f"⛔ Bước {idx+1}: Skipped")
     
-    # Bước 4: Edge Detection
+    # Bước 4: Edge Detection - Cả Sobel và Laplacian
     st.sidebar.markdown("### 4️⃣ Edge Detection")
-    detector_type = st.sidebar.selectbox(
-        "Loại detector:",
-        ["sobel", "laplacian"],
-        format_func=lambda x: {
-            "sobel": "Sobel (Gradient Magnitude)",
-            "laplacian": "Laplacian (Second Derivative)"
-        }[x]
+    st.sidebar.info("🔍 Hiển thị cả Sobel và Laplacian cùng lúc")
+    
+    # Tham số cho Sobel
+    st.sidebar.markdown("**Sobel Parameters:**")
+    sobel_params = {}
+    sobel_params['kernel_size'] = st.sidebar.select_slider(
+        "Sobel Kernel size:",
+        options=[3, 5, 7],
+        value=3,
+        key="sobel_kernel_size"
+    )
+    sobel_params['sigma'] = st.sidebar.slider(
+        "Sobel Sigma:",
+        0.1, 3.0, 1.0, 0.1,
+        key="sobel_sigma",
+        help="Gaussian smoothing trong Sobel"
     )
     
-    detector_params = {}
+    # Tham số cho Laplacian
+    st.sidebar.markdown("**Laplacian Parameters:**")
+    laplacian_params = {}
+    laplacian_params['kernel_size'] = st.sidebar.select_slider(
+        "Laplacian Kernel size:",
+        options=[3, 5, 7],
+        value=3,
+        key="laplacian_kernel_size"
+    )
+    laplacian_params['diagonal'] = st.sidebar.checkbox(
+        "Include diagonal",
+        value=False,
+        key="laplacian_diagonal",
+        help="Bao gồm các hướng chéo"
+    )
     
-    if detector_type == "sobel":
-        detector_params['kernel_size'] = st.sidebar.select_slider(
-            "Kernel size:",
-            options=[3, 5, 7],
-            value=3,
-            key="sobel_kernel_size"
-        )
-        detector_params['sigma'] = st.sidebar.slider(
-            "Sigma:",
-            0.1, 3.0, 1.0, 0.1,
-            key="sobel_sigma"
-        )
-    elif detector_type == "laplacian":
-        detector_params['kernel_size'] = st.sidebar.select_slider(
-            "Kernel size:",
-            options=[3, 5, 7],
-            value=3,
-            key="laplacian_kernel_size"
-        )
-        detector_params['diagonal'] = st.sidebar.checkbox(
-            "Include diagonal",
-            value=False,
-            key="laplacian_diagonal"
-        )
+    # Áp dụng cả 2 edge detection
+    sobel_result = apply_edge_detection(current_image, "sobel", sobel_params)
+    laplacian_result = apply_edge_detection(current_image, "laplacian", laplacian_params)
     
-    # Áp dụng edge detection
-    edge_result = apply_edge_detection(current_image, detector_type, detector_params)
-    
-    st.markdown('<div class="bai3-step-header">Edge Detection</div>', 
+    st.markdown('<div class="bai3-step-header">Edge Detection - So sánh Sobel và Laplacian</div>', 
                 unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
+    col1, col2, col3 = st.columns(3)
+    
     with col1:
         st.image(safe_image_display(current_image), 
                 caption="Before Edge Detection", 
                 use_container_width=True)
+    
     with col2:
-        caption = f"{detector_type.title()} Result"
-        if detector_type == 'sobel':
-            caption += f" ({detector_params['kernel_size']}x{detector_params['kernel_size']}, σ={detector_params['sigma']})"
-        else:
-            caption += f" ({detector_params['kernel_size']}x{detector_params['kernel_size']})"
-        
-        st.image(safe_image_display(edge_result), 
-                caption=caption, 
+        sobel_caption = f"Sobel Result\n({sobel_params['kernel_size']}x{sobel_params['kernel_size']}, σ={sobel_params['sigma']})"
+        st.image(safe_image_display(sobel_result), 
+                caption=sobel_caption, 
+                use_container_width=True)
+    
+    with col3:
+        laplacian_caption = f"Laplacian Result\n({laplacian_params['kernel_size']}x{laplacian_params['kernel_size']})"
+        if laplacian_params['diagonal']:
+            laplacian_caption += "\n+ Diagonal"
+        st.image(safe_image_display(laplacian_result), 
+                caption=laplacian_caption, 
                 use_container_width=True)
     
     # Tổng quan tất cả kết quả
@@ -562,8 +632,11 @@ def main():
     all_images.extend(preprocessing_images[1:])  # Bỏ input image vì đã có
     all_titles.extend([f"Preproc Step {i+1}" for i in range(len(preprocessing_images[1:]))])
     
-    all_images.append(edge_result)
-    all_titles.append(f'Edge Detection ({detector_type})')
+    # Thêm cả 2 kết quả edge detection
+    all_images.append(sobel_result)
+    all_titles.append('Sobel Edge')
+    all_images.append(laplacian_result)
+    all_titles.append('Laplacian Edge')
     
     # Hiển thị comparison plot
     comparison_fig = create_comparison_plot(all_images, all_titles)
@@ -585,8 +658,11 @@ def main():
     grayscale_images.extend(preprocessing_images[1:])
     grayscale_titles.extend([f"Preproc {i+1}" for i in range(len(preprocessing_images[1:]))])
     
-    grayscale_images.append(edge_result)
-    grayscale_titles.append('Edge Result')
+    # Thêm cả 2 kết quả edge detection
+    grayscale_images.append(sobel_result)
+    grayscale_titles.append('Sobel')
+    grayscale_images.append(laplacian_result)
+    grayscale_titles.append('Laplacian')
     
     histogram_fig = create_histogram_plot(grayscale_images, grayscale_titles)
     st.plotly_chart(histogram_fig, use_container_width=True)
@@ -614,7 +690,7 @@ def main():
     st.markdown('<div class="bai3-step-header">Download kết quả</div>', 
                 unsafe_allow_html=True)
     
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
     
     with col1:
         if noise_type != "none":
@@ -641,13 +717,26 @@ def main():
             )
     
     with col3:
-        edge_pil = Image.fromarray(edge_result)
+        # Download Sobel result
+        sobel_pil = Image.fromarray(sobel_result)
         buf = io.BytesIO()
-        edge_pil.save(buf, format='PNG')
+        sobel_pil.save(buf, format='PNG')
         st.download_button(
-            label="📥 Download Edge Detection",
+            label="📥 Download Sobel",
             data=buf.getvalue(),
-            file_name=f"edge_{detector_type}.png",
+            file_name="edge_sobel.png",
+            mime="image/png"
+        )
+    
+    with col4:
+        # Download Laplacian result
+        laplacian_pil = Image.fromarray(laplacian_result)
+        buf = io.BytesIO()
+        laplacian_pil.save(buf, format='PNG')
+        st.download_button(
+            label="📥 Download Laplacian",
+            data=buf.getvalue(),
+            file_name="edge_laplacian.png",
             mime="image/png"
         )
 
