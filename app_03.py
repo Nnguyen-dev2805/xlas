@@ -150,7 +150,8 @@ def apply_preprocessing_step(image, filter_type, filter_params):
         
         padding = kernel_size // 2
         result = convolution_2d_manual(image, kernel, padding=padding, stride=1)
-        return normalize_to_uint8(result)
+        return result
+        # return normalize_to_uint8(result)
     
     return image
 
@@ -294,12 +295,12 @@ def main():
     st.write("3. **Tiền xử lý** (Median, Gaussian, Mean, Histogram EQ, Sharpen, hoặc None) - có thể chọn 0-5 bước theo thứ tự")
     st.write("4. **Edge Detection** (Sobel và Laplacian cùng lúc)")
     st.write("")
-    st.success("💡 **Tính năng linh hoạt:** Bạn có thể bỏ qua bất kỳ bước nào bằng cách chọn 'None' hoặc đặt số bước = 0")
-    st.info("🎯 **Filters mới:** Mean Filter (tốt cho Uniform noise), Histogram Equalization (tăng contrast)")
+    st.success("**Tính năng linh hoạt:** Bạn có thể bỏ qua bất kỳ bước nào bằng cách chọn 'None' hoặc đặt số bước = 0")
+    st.info("**Filters mới:** Mean Filter (tốt cho Uniform noise), Histogram Equalization (tăng contrast)")
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Sidebar
-    st.sidebar.title("⚙️ Cấu hình Pipeline")
+    st.sidebar.title("Cấu hình Pipeline")
     
     # Bước 1: Upload ảnh
     st.sidebar.markdown("### 1️⃣ Chọn ảnh gốc")
@@ -429,7 +430,7 @@ def main():
                 "median": "Median Filter",
                 "gaussian": "Gaussian Filter",
                 "mean": "Mean Filter",
-                "histogram_eq": "📊 Histogram Equalization",
+                "histogram_eq": "Histogram Equalization",
                 "sharpen": "Sharpen Filter"
             }[x]
         )
@@ -468,11 +469,11 @@ def main():
                 key=f"mean_size_{i}",
                 help="Averaging window size"
             )
-            st.sidebar.info("💡 Tốt cho Uniform noise")
+            st.sidebar.info("Tốt cho Uniform noise")
         
         elif filter_type == "histogram_eq":
-            st.sidebar.caption("📊 Cân bằng histogram")
-            st.sidebar.info("💡 Tăng contrast, phân phối đều pixel values")
+            st.sidebar.caption("Cân bằng histogram")
+            st.sidebar.info("Tăng contrast, phân phối đều pixel values")
         
         elif filter_type == "sharpen":
             filter_params['kernel_size'] = st.sidebar.select_slider(
@@ -537,7 +538,7 @@ def main():
                     elif step['type'] == 'mean':
                         caption += f" {step['params']['kernel_size']}x{step['params']['kernel_size']}"
                     elif step['type'] == 'histogram_eq':
-                        caption = "📊 Histogram Equalized"
+                        caption = "Histogram Equalized"
                     elif step['type'] == 'sharpen':
                         caption += f" {step['params']['kernel_size']}x{step['params']['kernel_size']}, α={step['params']['alpha']}"
                     
@@ -698,7 +699,7 @@ def main():
             buf = io.BytesIO()
             noisy_pil.save(buf, format='PNG')
             st.download_button(
-                label="📥 Download Noisy Image",
+                label="Download Noisy Image",
                 data=buf.getvalue(),
                 file_name=f"noisy_{noise_type}.png",
                 mime="image/png"
@@ -710,7 +711,7 @@ def main():
             buf = io.BytesIO()
             preprocessed_pil.save(buf, format='PNG')
             st.download_button(
-                label="📥 Download Preprocessed",
+                label="Download Preprocessed",
                 data=buf.getvalue(),
                 file_name="preprocessed.png",
                 mime="image/png"
@@ -722,7 +723,7 @@ def main():
         buf = io.BytesIO()
         sobel_pil.save(buf, format='PNG')
         st.download_button(
-            label="📥 Download Sobel",
+            label="Download Sobel",
             data=buf.getvalue(),
             file_name="edge_sobel.png",
             mime="image/png"
@@ -734,7 +735,7 @@ def main():
         buf = io.BytesIO()
         laplacian_pil.save(buf, format='PNG')
         st.download_button(
-            label="📥 Download Laplacian",
+            label="Download Laplacian",
             data=buf.getvalue(),
             file_name="edge_laplacian.png",
             mime="image/png"

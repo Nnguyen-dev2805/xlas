@@ -18,6 +18,9 @@ def calculate_histogram_manual(image):
 
 # tính histogram - dùng thư viện
 def calculate_histogram_library(image):
+    # if image.dtype != np.uint8:
+    #     image = (255 * (image - np.min(image)) / (np.max(image) - np.min(image) + 1e-8)).astype(np.uint8)
+
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
     

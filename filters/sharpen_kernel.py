@@ -3,9 +3,6 @@ import cv2
 from core.convolution import convolution_2d_manual
 
 """
-Sharpen Filter
-==============
-
 Sharpen làm nét ảnh bằng cách tăng cường high-frequency components (edges, details)
 
 Công thức: Sharpened = Original + α * Laplacian
