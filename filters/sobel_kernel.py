@@ -4,9 +4,9 @@ from core.convolution import convolution_2d_manual
 
 """
     Sobel - tìm những vùng trong ảnh mà cường độ sáng thay đổi đột ngổ, tức là đạo hàm lớn nhất của ảnh
-    Biên ảnh chính là nơi gradient(độ dốc) đạt cực đại
-    Bảng chất của Sobel là giảm nhiễu trước khi tính gradient sau đó tính gradient để phát hiện cạnh
-    Đạo hàm(gradient) đo mức thay đổi cường độ sáng giữa các pixel lân cận
+    Biên hất của Sobel là giảm nhiễu trước khi tính gradient sau đó tính gradient để phát hiện cạnh
+    Đạo hàmảnh chính là nơi gradient(độ dốc) đạt cực đại
+    Bảng c(gradient) đo mức thay đổi cường độ sáng giữa các pixel lân cận
     Nơi nào thay đổi mạnh -> khả năng là biên
     Nhưng nếu ảnh có nhiễu, nhiễu cũng tạo ra những thay đổi đột ngột giả -> dẫn đến biên giả
     Làm mờ Guassian nó giữ lại những thay đổi lớn và loại bỏ giao động nhỏ
@@ -59,8 +59,7 @@ class SobelKernel:
                 
                 # Điểm xa vẫn có giá trị thông tin về xu hướng thay đổi tổng thể
                 # Nhưng càng xa thì đóng góp càng ít vào đọa hàm tại trung tâm -> giảm trọng số
-                # 
-                #  Lấy điểm cách trung tâm 2
+                # Lấy điểm cách trung tâm 2
                 if size >= 5 and center > 1 and center < size - 2:
                     derivative[center - 2] = -0.5
                     derivative[center + 2] = 0.5

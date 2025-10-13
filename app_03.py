@@ -165,15 +165,20 @@ def apply_edge_detection(image, detector_type, detector_params):
         kernel_size = detector_params.get('kernel_size', 3)
         
         # Tạo Sobel kernels
+        # if kernel_size !=3:
         sobel_x = SobelKernel.create_sobel_x_kernel(kernel_size, sigma)
         sobel_y = SobelKernel.create_sobel_y_kernel(kernel_size, sigma)
-        
+        # else:
+        #     sobel_x = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        #     sobel_y = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
+
         padding = kernel_size // 2
         
-        # Tính gradient
+        # Tính gradient theo X và Y
         gx = convolution_2d_manual(image, sobel_x, padding=padding, stride=1)
         gy = convolution_2d_manual(image, sobel_y, padding=padding, stride=1)
-        
+
+
         # Tính magnitude
         magnitude = SobelKernel.compute_gradient_magnitude(gx, gy)
         return normalize_to_uint8(magnitude)

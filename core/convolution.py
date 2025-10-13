@@ -91,7 +91,6 @@ def median_filter_manual(image, kernel_size):
     padded_image = add_padding(image, pad_size)
     
     # Thêm padding để giúp kernel không bị tràn
-    
     filtered_image = np.zeros((height, width), dtype=np.uint8)
     
     # Median filtering
@@ -105,13 +104,14 @@ def median_filter_manual(image, kernel_size):
             
             neighborhood = padded_image[start_i:end_i, start_j:end_j]
             
+            
             # Flatten và sort để tìm median
             flat_neighborhood = neighborhood.flatten()
-            flat_neighborhood.sort()
+            # flat_neighborhood.sort()
             
             # Median = element ở giữa 
-            median_idx = len(flat_neighborhood) // 2
-            filtered_image[i, j] = flat_neighborhood[median_idx]
+            # median_idx = len(flat_neighborhood) // 2
+            filtered_image[i, j] = np.median(flat_neighborhood)
     
     return filtered_image
 
@@ -185,19 +185,40 @@ def max_filter_manual(image, kernel_size):
     
     return filtered_image
 
-# thresholding comparison giữa 2 ảnh
 def threshold_comparison(image1, image2):
     """
     Thresholding comparison giữa 2 ảnh
     Logic: if image1(x,y) > image2(x,y) then output = 0 else output = image2(x,y)
     """
-    # Đảm bảo 2 ảnh có cùng kích thước
-    if image1.shape != image2.shape:
-        # Resize image1 để match image2
-        from core.image_ops import resize_to_match
-        image1 = resize_to_match(image1, image2.shape)
+    # # Đảm bảo 2 ảnh có cùng kích thước
+    # if image1.shape != image2.shape:
+    #     # Resize image1 để match image2
+    #     from core.image_ops import resize_to_match
+    #     image1 = resize_to_match(image1, image2.shape)
     
-    # Thực hiện thresholding comparison
-    result = np.where(image1 > image2, 0, image2)
+    # # Thực hiện thresholding comparison
+    # result = np.where(image1 > image2, 0, image2)
     
-    return result.astype(np.uint8)
+    # return result.astype(np.uint8)
+    h4, w4 = image1.shape
+    h5, w5 = image2.shape
+
+    # Kích thước lớn nhất
+    H, W = max(h4, h5), max(w4, w5)
+
+    # Hàm padding đều hai bên
+    def zero_pad(img, target_h, target_w):
+        top = (target_h - img.shape[0]) // 2
+        bottom = target_h - img.shape[0] - top
+        left = (target_w - img.shape[1]) // 2
+        right = target_w - img.shape[1] - left
+        return cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_CONSTANT, value=0)
+
+    # Padding hai ảnh
+    I4_padded = zero_pad(image1, H, W)
+    I5_padded = zero_pad(image2, H, W)
+
+    # Tính ảnh kết quả theo điều kiện
+    I6 = np.where(I4_padded > I5_padded, 0, I5_padded)
+
+    return I6.astype(np.uint8)

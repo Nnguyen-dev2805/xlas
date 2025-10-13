@@ -6,7 +6,7 @@ def calculate_histogram_manual(image):
     if len(image.shape) != 2:
         raise ValueError("Input must be grayscale image")
     
-    histogram = np.zeros(256, dtype=int)
+    histogram = np.zeros(256 , dtype=int)
     
     height, width = image.shape
     for i in range(height):
@@ -43,7 +43,7 @@ def histogram_equalization_manual(image):
     
     height, width = image.shape
     n = height * width  # Total pixels
-    L = 256  # Number of intensity levels
+    L = 10  # Number of intensity levels
     
     # Step 1: Tính histogram gốc
     hist = calculate_histogram_manual(image)
@@ -52,14 +52,14 @@ def histogram_equalization_manual(image):
     p_in = hist / n
     
     # Step 3: Tính s_k = CDF
-    s = np.zeros(256)
+    s = np.zeros(L)
     s[0] = p_in[0]
-    for k in range(1, 256):
+    for k in range(1, L):
         s[k] = s[k-1] + p_in[k]
     
     # Step 4: Scale s_k về [0, L-1] và tạo LUT
-    lut = np.zeros(256, dtype=np.uint8)
-    for k in range(256):
+    lut = np.zeros(L, dtype=np.uint8)
+    for k in range(L):
         scaled_value = s[k] * (L - 1)
         lut[k] = int(np.clip(np.round(scaled_value), 0, L-1))
     

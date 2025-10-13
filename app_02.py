@@ -23,6 +23,7 @@ from filters.laplacian_kernel import LaplacianKernel
 from filters.sharpen_kernel import SharpenKernel
 from filters.median_kernel import MedianKernel
 from filters.noise_generator import NoiseGenerator
+from test_data import *
 
 def safe_image_display(image):
     if image is None:
@@ -512,6 +513,7 @@ def main():
         # Simulate progress (thực tế sẽ được update trong hàm)
         gray_image = rgb_to_grayscale_manual(rgb_array)
         progress_bar.progress(1.0)
+        # gray_image = TEST_MATRIX_3
         status_text.success("Chuyển đổi hoàn thành!")
     
     col1, col2 = st.columns(2)
@@ -552,6 +554,8 @@ def main():
         # Tạo Sobel X và Y kernels
         sobel_x_3x3 = SobelKernel.create_sobel_x_kernel(3, sigma_sobel)
         sobel_y_3x3 = SobelKernel.create_sobel_y_kernel(3, sigma_sobel)
+        # sobel_x_3x3 = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
+        # sobel_y_3x3 = np.array([[1, 2, 1], [0, 0, 0], [-1, -2, -1]])
         sobel_x_5x5 = SobelKernel.create_sobel_x_kernel(5, sigma_sobel)
         sobel_y_5x5 = SobelKernel.create_sobel_y_kernel(5, sigma_sobel)
         sobel_x_7x7 = SobelKernel.create_sobel_x_kernel(7, sigma_sobel)
@@ -863,7 +867,7 @@ def main():
         # Thêm vào subplot
         fig_hist.add_trace(
             go.Bar(
-                x=list(range(256)),
+                x=list(range(8)),
                 y=hist,
                 name=title,
                 marker_color=color,

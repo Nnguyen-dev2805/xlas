@@ -24,6 +24,8 @@ from core.image_ops import (
     rgb_to_grayscale_library
 )
 
+from test_data import *
+
 def safe_image_display(image):
     if image is None:
         return None
@@ -88,38 +90,38 @@ def create_histogram_plot(h1, h2, h3, min_val, max_val):
     
     # H1 - Histogram gốc
     fig.add_trace(
-        go.Scatter(x=list(range(256)), y=h1, name='H1 - Gốc', 
+        go.Scatter(x=list(range(10)), y=h1, name='H1 - Gốc', 
                   line_color=colors[0], line_width=2),
         row=1, col=1
     )
     
     # H2 - Sau cân bằng
     fig.add_trace(
-        go.Scatter(x=list(range(256)), y=h2, name='H2 - Cân bằng', 
+        go.Scatter(x=list(range(10)), y=h2, name='H2 - Cân bằng', 
                   line_color=colors[1], line_width=2),
         row=1, col=2
     )
     
     # H3 - Thu hẹp
     fig.add_trace(
-        go.Scatter(x=list(range(256)), y=h3, name='H3 - Thu hẹp', 
+        go.Scatter(x=list(range(10)), y=h3, name='H3 - Thu hẹp', 
                   line_color=colors[2], line_width=2),
         row=2, col=1
     )
     
     # So sánh tất cả
     fig.add_trace(
-        go.Scatter(x=list(range(256)), y=h1, name='H1 - Gốc', 
+        go.Scatter(x=list(range(10)), y=h1, name='H1 - Gốc', 
                   line_color=colors[0], line_width=2),
         row=2, col=2
     )
     fig.add_trace(
-        go.Scatter(x=list(range(256)), y=h2, name='H2 - Cân bằng', 
+        go.Scatter(x=list(range(10)), y=h2, name='H2 - Cân bằng', 
                   line_color=colors[1], line_width=2),
         row=2, col=2
     )
     fig.add_trace(
-        go.Scatter(x=list(range(256)), y=h3, name='H3 - Thu hẹp', 
+        go.Scatter(x=list(range(10)), y=h3, name='H3 - Thu hẹp', 
                   line_color=colors[2], line_width=2),
         row=2, col=2
     )
@@ -268,6 +270,7 @@ def process_single_image(image, image_name, method, min_val, max_val):
             gray_image = rgb_to_grayscale_library(image)
         else:
             gray_image = rgb_to_grayscale_manual(image)
+        gray_image = TEST_MATRIX_1
         results['gray_image'] = gray_image
         
         # Bước 2: Tính histogram gốc - sử dụng core functions
