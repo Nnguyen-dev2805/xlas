@@ -91,14 +91,6 @@ def median_filter_manual(image, kernel_size):
     padded_image = add_padding(image, pad_size)
     
     # Thêm padding để giúp kernel không bị tràn
-    for i in range(pad_size):
-        # Top và bottom
-        padded_image[i, pad_size:-pad_size] = image[pad_size-1-i, :]
-        padded_image[-(i+1), pad_size:-pad_size] = image[height-pad_size+i, :]
-        
-        # Left và right
-        padded_image[pad_size:-pad_size, i] = image[:, pad_size-1-i]
-        padded_image[pad_size:-pad_size, -(i+1)] = image[:, width-pad_size+i]
     
     filtered_image = np.zeros((height, width), dtype=np.uint8)
     
@@ -117,7 +109,7 @@ def median_filter_manual(image, kernel_size):
             flat_neighborhood = neighborhood.flatten()
             flat_neighborhood.sort()
             
-            # Median = element ở giữa
+            # Median = element ở giữa 
             median_idx = len(flat_neighborhood) // 2
             filtered_image[i, j] = flat_neighborhood[median_idx]
     

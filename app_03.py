@@ -150,7 +150,10 @@ def apply_preprocessing_step(image, filter_type, filter_params):
         
         padding = kernel_size // 2
         result = convolution_2d_manual(image, kernel, padding=padding, stride=1)
+
+        result = np.clip(result, 0, 255).astype(np.uint8)
         return result
+        # return result
         # return normalize_to_uint8(result)
     
     return image
@@ -220,6 +223,83 @@ def create_comparison_plot(images, titles):
         row = idx // cols
         col = idx % cols
         axes[row, col].axis('off')
+    
+    plt.tight_layout()
+    return fig
+
+def create_report_figure_for_edge_detection(input_image, preprocessed_image, sobel_result, laplacian_result, 
+                                            noise_type, preprocessing_steps):
+    """
+    Tạo tấm ảnh báo cáo đẹp cho Edge Detection Pipeline
+    - Row 1: 4 ảnh (Input/Noisy, Preprocessed, Sobel, Laplacian)
+    - Row 2: 4 histogram tương ứng
+    """
+    fig, axes = plt.subplots(2, 4, figsize=(18, 9))
+    
+    # Pipeline description
+    pipeline_desc = f"Noise: {noise_type}"
+    if preprocessing_steps:
+        steps_desc = " → ".join([f"{s['type']}" for s in preprocessing_steps if s['type'] != 'none'])
+        if steps_desc:
+            pipeline_desc += f" | Preprocessing: {steps_desc}"
+    pipeline_desc += " | Edge Detection: Sobel + Laplacian"
+    
+    fig.suptitle(f'Edge Detection Pipeline Report\n{pipeline_desc}', 
+                fontsize=14, fontweight='bold', y=0.98)
+    
+    # Row 1: Ảnh
+    images = [input_image, preprocessed_image, sobel_result, laplacian_result]
+    input_title = f'Input ({noise_type})' if noise_type != 'none' else 'Input (No Noise)'
+    titles = [input_title, 'After Preprocessing', 'Sobel Edge Detection', 'Laplacian Edge Detection']
+    colors_border = ['#3498db', '#e74c3c', '#f39c12', '#2ecc71']
+    
+    for i, (img, title, color) in enumerate(zip(images, titles, colors_border)):
+        axes[0, i].imshow(img, cmap='gray', vmin=0, vmax=255)
+        axes[0, i].set_title(title, fontsize=11, fontweight='bold', color=color)
+        axes[0, i].axis('off')
+        
+        # Thêm border màu
+        for spine in axes[0, i].spines.values():
+            spine.set_edgecolor(color)
+            spine.set_linewidth(3)
+            spine.set_visible(True)
+        
+        # Thêm thống kê nhỏ
+        mean_val = np.mean(img)
+        std_val = np.std(img)
+        axes[0, i].text(0.5, -0.08, f'μ={mean_val:.1f}, σ={std_val:.1f}', 
+                       transform=axes[0, i].transAxes, ha='center', fontsize=9,
+                       bbox=dict(boxstyle='round', facecolor='white', alpha=0.8, edgecolor=color, linewidth=2))
+    
+    # Row 2: Histogram
+    hist_titles = ['H1: Input Histogram', 'H2: Preprocessed Histogram', 
+                  'H3: Sobel Histogram', 'H4: Laplacian Histogram']
+    
+    for i, (img, title, color) in enumerate(zip(images, hist_titles, colors_border)):
+        hist, bins = np.histogram(img.flatten(), bins=256, range=(0, 256))
+        
+        axes[1, i].plot(range(256), hist, color=color, linewidth=2, label=title)
+        axes[1, i].fill_between(range(256), hist, alpha=0.3, color=color)
+        axes[1, i].set_title(title, fontsize=11, fontweight='bold', color=color)
+        axes[1, i].set_xlabel('Pixel Value (0-255)', fontsize=9)
+        axes[1, i].set_ylabel('Frequency', fontsize=9)
+        axes[1, i].grid(True, alpha=0.3, linestyle='--', linewidth=0.5)
+        axes[1, i].set_xlim([0, 255])
+        
+        # Highlight peak
+        peak_idx = np.argmax(hist)
+        peak_val = hist[peak_idx]
+        axes[1, i].plot(peak_idx, peak_val, 'r*', markersize=10, 
+                       label=f'Peak: {peak_idx}')
+        axes[1, i].legend(fontsize=8, loc='upper right')
+        
+        # Style
+        axes[1, i].spines['top'].set_visible(False)
+        axes[1, i].spines['right'].set_visible(False)
+        axes[1, i].spines['left'].set_color(color)
+        axes[1, i].spines['bottom'].set_color(color)
+        axes[1, i].spines['left'].set_linewidth(2)
+        axes[1, i].spines['bottom'].set_linewidth(2)
     
     plt.tight_layout()
     return fig
@@ -740,6 +820,60 @@ def main():
             file_name="edge_laplacian.png",
             mime="image/png"
         )
+    
+    # ===== PHẦN MỚI: Tấm ảnh báo cáo đẹp cho Edge Detection =====
+    st.markdown("---")
+    st.markdown('<div class="bai3-step-header">📊 Tấm Ảnh Báo Cáo (Report Figure)</div>', 
+                unsafe_allow_html=True)
+    st.info("💡 Tấm ảnh này chứa 4 ảnh + 4 histogram (Input, Preprocessed, Sobel, Laplacian), phù hợp để chèn vào báo cáo/bài viết khoa học")
+    
+    # Xác định input image cho report (noisy hoặc gray)
+    report_input_image = noisy_image if noise_type != "none" else gray_image
+    report_preprocessed_image = preprocessing_images[-1] if len(preprocessing_images) > 1 else gray_image
+    
+    # Tạo report figure
+    report_fig = create_report_figure_for_edge_detection(
+        report_input_image,
+        report_preprocessed_image,
+        sobel_result,
+        laplacian_result,
+        noise_type,
+        preprocessing_pipeline
+    )
+    
+    # Hiển thị figure
+    st.pyplot(report_fig)
+    
+    # Nút download
+    col_dl1, col_dl2, col_dl3 = st.columns([1, 2, 1])
+    with col_dl2:
+        # Lưu figure thành bytes
+        buf = io.BytesIO()
+        report_fig.savefig(buf, format='png', dpi=300, bbox_inches='tight', 
+                          facecolor='white', edgecolor='none')
+        buf.seek(0)
+        
+        # Tạo filename dựa trên config
+        filename_parts = ['edge_detection_report']
+        if noise_type != "none":
+            filename_parts.append(noise_type)
+        if preprocessing_pipeline:
+            preproc_names = "_".join([s['type'] for s in preprocessing_pipeline if s['type'] != 'none'])
+            if preproc_names:
+                filename_parts.append(preproc_names)
+        filename = "_".join(filename_parts) + ".png"
+        
+        st.download_button(
+            label="📥 Download Tấm Ảnh Báo Cáo (High Resolution PNG)",
+            data=buf.getvalue(),
+            file_name=filename,
+            mime="image/png",
+            type="primary",
+            use_container_width=True,
+            help="DPI 300, phù hợp cho báo cáo và bài viết khoa học"
+        )
+    
+    plt.close(report_fig)
 
 if __name__ == "__main__":
     main()

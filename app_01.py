@@ -364,6 +364,55 @@ def render_batch_results():
     # Hiển thị kết quả chi tiết cho ảnh được chọn
     render_single_result(result, config['min_val'], config['max_val'])
 
+# tạo tấm ảnh đẹp cho báo cáo (3 ảnh + 3 histogram)
+def create_report_figure(result, min_val, max_val, image_name):
+    """
+    Tạo figure đẹp cho báo cáo:
+    - Row 1: 3 ảnh (Xám, Cân bằng, Thu hẹp)
+    - Row 2: 3 histogram tương ứng
+    """
+    fig, axes = plt.subplots(2, 3, figsize=(15, 8))
+    fig.suptitle(f'Histogram Processing Report - {image_name}', fontsize=16, fontweight='bold', y=0.98)
+    
+    # Row 1: Ảnh
+    images = [result['gray_image'], result['equalized_image'], result['narrowed_image']]
+    titles = ['(a) Ảnh Xám Gốc', '(b) Ảnh Cân Bằng Histogram', f'(c) Ảnh Thu Hẹp [{min_val}-{max_val}]']
+    
+    for i, (img, title) in enumerate(zip(images, titles)):
+        axes[0, i].imshow(img, cmap='gray', vmin=0, vmax=255)
+        axes[0, i].set_title(title, fontsize=12, fontweight='bold')
+        axes[0, i].axis('off')
+        
+        # Thêm thống kê nhỏ
+        mean_val = np.mean(img)
+        std_val = np.std(img)
+        axes[0, i].text(0.5, -0.05, f'Mean: {mean_val:.1f}, Std: {std_val:.1f}', 
+                       transform=axes[0, i].transAxes, ha='center', fontsize=9,
+                       bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
+    
+    # Row 2: Histogram
+    histograms = [result['h1'], result['h2'], result['h3']]
+    hist_titles = ['H1 - Histogram Gốc', 'H2 - Histogram Cân Bằng', f'H3 - Histogram Thu Hẹp']
+    colors = ['#3498db', '#e74c3c', '#2ecc71']
+    
+    for i, (hist, title, color) in enumerate(zip(histograms, hist_titles, colors)):
+        axes[1, i].plot(range(256), hist, color=color, linewidth=2)
+        axes[1, i].fill_between(range(256), hist, alpha=0.3, color=color)
+        axes[1, i].set_title(title, fontsize=12, fontweight='bold')
+        axes[1, i].set_xlabel('Mức xám (0-255)', fontsize=10)
+        axes[1, i].set_ylabel('Tần suất', fontsize=10)
+        axes[1, i].grid(True, alpha=0.3, linestyle='--')
+        axes[1, i].set_xlim([0, 255])
+        
+        # Thêm vùng đánh dấu cho thu hẹp
+        if i == 2:
+            axes[1, i].axvline(x=min_val, color='red', linestyle='--', linewidth=1.5, label=f'Min={min_val}')
+            axes[1, i].axvline(x=max_val, color='red', linestyle='--', linewidth=1.5, label=f'Max={max_val}')
+            axes[1, i].legend(fontsize=8)
+    
+    plt.tight_layout()
+    return fig
+
 # hiển thị kết quả chi tiết cho một ảnh
 def render_single_result(result, min_val, max_val):
     # Hiển thị 4 bước xử lý
@@ -393,6 +442,38 @@ def render_single_result(result, min_val, max_val):
     # Hiển thị histogram
     fig = create_histogram_plot(result['h1'], result['h2'], result['h3'], min_val, max_val)
     st.plotly_chart(fig, use_container_width=True)
+    
+    # ===== PHẦN MỚI: Tạo tấm ảnh đẹp cho báo cáo =====
+    st.markdown("---")
+    st.markdown('<div class="bai1-section-header">📊 Tấm Ảnh Báo Cáo (Report Figure)</div>', 
+                unsafe_allow_html=True)
+    st.info("💡 Tấm ảnh này chứa 3 ảnh + 3 histogram, phù hợp để chèn vào báo cáo/bài viết khoa học")
+    
+    # Tạo figure
+    report_fig = create_report_figure(result, min_val, max_val, result['name'])
+    
+    # Hiển thị figure
+    st.pyplot(report_fig)
+    
+    # Nút download
+    col_dl1, col_dl2, col_dl3 = st.columns([1, 2, 1])
+    with col_dl2:
+        # Lưu figure thành bytes
+        buf = io.BytesIO()
+        report_fig.savefig(buf, format='png', dpi=300, bbox_inches='tight', 
+                          facecolor='white', edgecolor='none')
+        buf.seek(0)
+        
+        st.download_button(
+            label="📥 Download Tấm Ảnh Báo Cáo (High Resolution PNG)",
+            data=buf.getvalue(),
+            file_name=f"report_{result['name'].replace('.', '_')}.png",
+            mime="image/png",
+            type="primary",
+            use_container_width=True
+        )
+    
+    plt.close(report_fig)
 
 # hàm chính
 def main():

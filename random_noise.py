@@ -53,7 +53,7 @@ if uploaded_file is not None:
         byte_im = buf.getvalue()
 
         st.download_button(
-            label="💾 Tải ảnh nhiễu về",
+            label="💾 Tải ảnh nhiễu v   ề",
             data=byte_im,
             file_name=f"noisy_{noise_name.replace(' ', '_')}.jpg",
             mime="image/jpeg"
