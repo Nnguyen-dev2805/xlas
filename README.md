@@ -1,5 +1,7 @@
 <div align="center">
+  
 # XLAS - Ứng Dụng Xử Lý Ảnh Số
+
 </div>
 <p align="center">
 
