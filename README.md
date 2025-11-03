@@ -1,6 +1,6 @@
+<p align="center">
 # XLAS - Ứng Dụng Xử Lý Ảnh Số
 
-<p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/Streamlit-1.0+-red.svg" alt="Streamlit">
   <img src="https://img.shields.io/badge/OpenCV-4.0+-green.svg" alt="OpenCV">
