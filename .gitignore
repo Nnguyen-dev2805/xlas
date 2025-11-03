@@ -1,6 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
+*.py[codz]
 *$py.class
 
 # C extensions
@@ -24,9 +24,11 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-PIPFILE.lock
+MANIFEST
 
 # PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
 
@@ -44,7 +46,7 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
-*.py,cover
+*.py.cover
 .hypothesis/
 .pytest_cache/
 cover/
@@ -81,18 +83,48 @@ profile_default/
 ipython_config.py
 
 # pyenv
-.python-version
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
 
 # pipenv
-Pipfile.lock
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# UV
+#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#uv.lock
 
 # poetry
-poetry.lock
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
+#   This is especially recommended for binary packages to ensure reproducibility, and is more
+#   commonly ignored for libraries.
+#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+#poetry.toml
 
 # pdm
-.pdm.toml
+#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
+#   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
+#pdm.lock
+#pdm.toml
+.pdm-python
+.pdm-build/
 
-# PEP 582
+# pixi
+#   Similar to Pipfile.lock, it is generally recommended to include pixi.lock in version control.
+#pixi.lock
+#   Pixi creates a virtual environment in the .pixi directory, just like venv module creates one
+#   in the .venv directory. It is recommended not to include this directory in version control.
+.pixi
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
 
 # Celery stuff
@@ -104,6 +136,7 @@ celerybeat.pid
 
 # Environments
 .env
+.envrc
 .venv
 env/
 venv/
@@ -135,116 +168,40 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-
-# Streamlit
-.streamlit/secrets.toml
-.streamlit/config.toml
-
-# Data files
-*.csv
-*.xlsx
-*.xls
-*.json
-*.xml
-*.sqlite
-
-# Image files (nếu không muốn commit ảnh test)
-# Uncomment nếu không muốn commit ảnh
-# *.jpg
-# *.jpeg
-# *.png
-# *.gif
-# *.bmp
-# *.tiff
-# *.webp
-
-# Uploaded/processed images
-uploads/
-outputs/
-temp/
-processed/
-
-# Model files
-*.h5
-*.pkl
-*.pickle
-*.joblib
-*.model
-*.pth
-*.pt
-*.onnx
-
-# Logs
-logs/
-*.log
-
-# OS files
-Thumbs.db
-.DS_Store
-desktop.ini
-
-# Backup files
-*.bak
-*.backup
-*.old
-*.orig
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-
-# Conda
-*.conda
-*.tar.bz2
-
-# Jupyter
-.ipynb_checkpoints/
-*.ipynb
-
 # PyCharm
-.idea/
-*.iml
-*.iws
-*.ipr
+#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
+#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+#  and can be added to the global gitignore or merged into this file.  For a more nuclear
+#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
+#.idea/
 
-# VS Code
-.vscode/
-*.code-workspace
+# Abstra
+# Abstra is an AI-powered process automation framework.
+# Ignore directories containing user credentials, local state, and settings.
+# Learn more at https://abstra.io/docs
+.abstra/
 
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
+# Visual Studio Code
+#  Visual Studio Code specific template is maintained in a separate VisualStudioCode.gitignore 
+#  that can be found at https://github.com/github/gitignore/blob/main/Global/VisualStudioCode.gitignore
+#  and can be added to the global gitignore or merged into this file. However, if you prefer, 
+#  you could uncomment the following to ignore the entire vscode folder
+# .vscode/
 
-# Archives
-*.zip
-*.tar
-*.tar.gz
-*.rar
-*.7z
+# Ruff stuff:
+.ruff_cache/
 
-# Windows
-$RECYCLE.BIN/
-ehthumbs.db
+# PyPI configuration file
+.pypirc
 
-# macOS
-.AppleDouble
-.LSOverride
-Icon
-._*
-.Spotlight-V100
-.Trashes
+# Cursor
+#  Cursor is an AI-powered code editor. `.cursorignore` specifies files/directories to
+#  exclude from AI features like autocomplete and code analysis. Recommended for sensitive data
+#  refer to https://docs.cursor.com/context/ignore-files
+.cursorignore
+.cursorindexingignore
 
-# Linux
-*~
-.fuse_hidden*
-.directory
-.Trash-*
-.nfs*
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
